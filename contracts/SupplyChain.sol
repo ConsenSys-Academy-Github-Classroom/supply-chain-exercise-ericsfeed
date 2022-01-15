@@ -138,11 +138,10 @@ contract SupplyChain {
   // 1. it should be payable in order to receive refunds
   function buyItem(uint sku) payable public forSale(sku) {
   // 2. this should transfer money to the seller,
-    // find the value of the item in the array  
-    // find the seller in the array 
     items[sku].seller.transfer(items[sku].price);
 
   // 3. set the buyer as the person who called this transaction, 
+    items[sku].buyer = msg.sender; 
 
   // 4. set the state to Sold. 
       items[sku].state = State.Sold; 
@@ -160,6 +159,7 @@ contract SupplyChain {
   //    - the item is sold already 
   //    - the person calling this function is the seller. 
   function shipItem(uint sku) public sold(sku) {
+    if (items[sku].seller != msg.sender) revert(); 
 
   // 2. Change the state of the item to shipped. 
     items[sku].state = State.Shipped; 
@@ -170,6 +170,8 @@ contract SupplyChain {
   }
 
   function receiveItem(uint sku) public shipped(sku) {
+    if (items[sku].buyer != msg.sender) revert(); 
+
   // 1. Add modifiers to check 
   //    - the item is shipped already 
   //    - the person calling this function is the buyer. 
